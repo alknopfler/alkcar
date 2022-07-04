@@ -1,6 +1,7 @@
 package main
 
 import (
+	"database/sql"
 	"fyne.io/fyne/v2"
 	"fyne.io/fyne/v2/app"
 	"fyne.io/fyne/v2/container"
@@ -8,32 +9,28 @@ import (
 	"fyne.io/fyne/v2/layout"
 	"fyne.io/fyne/v2/theme"
 	"fyne.io/fyne/v2/widget"
+	_ "github.com/mattn/go-sqlite3"
 )
-
-type Contact struct {
-	ID        string `json:"_id,omitempty"`
-	FirstName string `json:"firstname,omitempty"`
-	LastName  string `json:"lastname,omitempty"`
-	Email     string `json:"email,omitempty"`
-	Phone     string `json:"phone,omitempty"`
-}
 
 func main() {
 	myApp := app.New()
 	myWindow := myApp.NewWindow("Contact Data")
 
-	var loadedData []Contact
+	db, err := sql.Open("sqlite3", "~/Desktop/raul-logistica/data-logistic.sqlite")
+	if err != nil {
+		panic(err)
+	}
+	var loadedData Agenda
 
 	var list *widget.List
 
 	list = widget.NewList(
 		func() int { return len(loadedData) },
 		func() fyne.CanvasObject {
-			firstNameLabel := widget.NewLabel("First Name")
-			lastNameLabel := widget.NewLabel("Last Name")
-			emailLabel := widget.NewLabel("Email")
-			phoneLabel := widget.NewLabel("Phone")
-			contactContainer := container.NewGridWithColumns(4, firstNameLabel, lastNameLabel, emailLabel, phoneLabel)
+			nombreLabel := widget.NewLabel("Nombre Empresa")
+			telefLabel := widget.NewLabel("Telefono")
+			zonaLabel := widget.NewLabel("Zona")
+			contactContainer := container.NewGridWithColumns(4, nombreLabel, telefLabel, zonaLabel)
 			edtb := widget.NewButtonWithIcon("", theme.DocumentCreateIcon(), nil)
 			delb := widget.NewButtonWithIcon("", theme.DeleteIcon(), nil)
 			buttonContainer := container.NewHBox(edtb, delb)
@@ -45,34 +42,30 @@ func main() {
 			contactContainer := c.Objects[0].(*fyne.Container)
 			buttonContainer := c.Objects[1].(*fyne.Container)
 
-			firstNameLabel := contactContainer.Objects[0].(*widget.Label)
-			lastNameLabel := contactContainer.Objects[1].(*widget.Label)
-			emailLabel := contactContainer.Objects[2].(*widget.Label)
-			phoneLabel := contactContainer.Objects[3].(*widget.Label)
+			nombreLabel := contactContainer.Objects[0].(*widget.Label)
+			telefLabel := contactContainer.Objects[1].(*widget.Label)
+			zonaLabel := contactContainer.Objects[2].(*widget.Label)
 
 			edtb := buttonContainer.Objects[0].(*widget.Button)
 			delb := buttonContainer.Objects[1].(*widget.Button)
 
-			_ = loadedData[i].ID
+			_ = loadedData[i].IdEntrada
 
-			firstNameLabel.SetText(loadedData[i].FirstName)
-			lastNameLabel.SetText(loadedData[i].LastName)
-			emailLabel.SetText(loadedData[i].Email)
-			phoneLabel.SetText(loadedData[i].Phone)
+			nombreLabel.SetText(loadedData[i].NombreEmpresa)
+			telefLabel.SetText(loadedData[i].Telefono1)
+			zonaLabel.SetText(loadedData[i].Zona)
 
 			edtb.OnTapped = func() {
 
 				entryFirstName := widget.NewEntry()
-				entryLastName := widget.NewEntry()
-				entryEmail := widget.NewEntry()
+				entryZona := widget.NewEntry()
 				entryPhone := widget.NewEntry()
 
-				firstNameForm := widget.NewFormItem("First Name", entryFirstName)
-				lastNameForm := widget.NewFormItem("Last Name", entryLastName)
-				emailForm := widget.NewFormItem("Email", entryEmail)
-				phoneForm := widget.NewFormItem("Phone", entryPhone)
+				firstNameForm := widget.NewFormItem("Nombre Empresa", entryFirstName)
+				lastNameForm := widget.NewFormItem("Zona", entryZona)
+				phoneForm := widget.NewFormItem("Telefono", entryPhone)
 
-				formItems := []*widget.FormItem{firstNameForm, lastNameForm, emailForm, phoneForm}
+				formItems := []*widget.FormItem{firstNameForm, lastNameForm, phoneForm}
 
 				dialog1 := dialog.NewForm("Edit Contact", "Save", "Cancel", formItems, func(b bool) {
 
@@ -80,10 +73,9 @@ func main() {
 					list.Refresh()
 				}, myWindow)
 
-				entryFirstName.SetText(firstNameLabel.Text)
-				entryLastName.SetText(lastNameLabel.Text)
-				entryEmail.SetText(emailLabel.Text)
-				entryPhone.SetText(phoneLabel.Text)
+				entryFirstName.SetText(nombreLabel.Text)
+				entryZona.SetText(zonaLabel.Text)
+				entryPhone.SetText(telefLabel.Text)
 
 				dialog1.Resize(fyne.NewSize(500, 300))
 

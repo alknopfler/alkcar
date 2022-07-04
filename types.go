@@ -1,7 +1,7 @@
 package main
 
 type Agenda []struct {
-	Identrada     string `json:"IdEntrada"`
+	IdEntrada     string `json:"IdEntrada"`
 	NombreEmpresa string `json:"Nombre_Empresa"`
 	Letra         string `json:"Letra"`
 	Zona          string `json:"Zona"`
